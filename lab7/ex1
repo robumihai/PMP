@@ -1,0 +1,65 @@
+import pymc as pm
+import numpy as np
+import arviz as az
+import warnings
+
+warnings.simplefilter(action="ignore", category=FutureWarning)
+
+data = np.array([56, 60, 58, 55, 57, 59, 61, 56, 58, 60])
+
+# a) 
+x_prior_mean = np.mean(data)
+
+with pm.Model() as model_a:
+    # Prori slabi
+    sigma = pm.HalfNormal("sigma", sigma=10)
+    mu = pm.Normal("mu", mu=x_prior_mean, sigma=10)
+    
+    # Verosimilitate
+    X_obs = pm.Normal("X_obs", mu=mu, sigma=sigma, observed=data)
+
+# b) Inferenta (Prori Slabi)
+with model_a:
+    idata_a = pm.sample(2000, tune=1000, chains=4, random_seed=42)
+
+# Rotunjim
+summary_a = az.summary(idata_a, var_names=["mu", "sigma"], hdi_prob=0.95, round_to=2)
+
+print(f"a) Valoarea recomandata pentru x (media datelor): {x_prior_mean:.1f}")
+print("\nb) Rezultate (Prori Slabi):")
+print(summary_a)
+
+
+#  c) Comparatie Frecventista 
+mean_freq = np.mean(data)
+std_freq = np.std(data, ddof=1) # ddof=1 pentru N-1
+
+print("\nc) Comparatie Frecventist vs. Bayesian (Slab):")
+print(f"   Media (Freq): {mean_freq:.2f}  |  (Bayes 'mu'): {summary_a.loc['mu', 'mean']:.2f}")
+print(f"   Std (Freq):   {std_freq:.2f}  |  (Bayes 'sigma'): {summary_a.loc['sigma', 'mean']:.2f}")
+print("   -> Sunt aproape identice. Cu prori slabi, datele domina.")
+
+
+#  d) Model 2 (Prior Puternic) 
+with pm.Model() as model_b:
+    # Prior sigma (slab)
+    sigma = pm.HalfNormal("sigma", sigma=10)
+    # Prior mu (puternic si gresit, centrat la 50)
+    mu = pm.Normal("mu", mu=50.0, sigma=1.0)
+    
+    # Verosimilitate
+    X_obs = pm.Normal("X_obs", mu=mu, sigma=sigma, observed=data)
+
+# Inferenta
+with model_b:
+    idata_b = pm.sample(2000, tune=1000, chains=4, random_seed=42)
+
+summary_b = az.summary(idata_b, var_names=["mu", "sigma"], hdi_prob=0.95, round_to=2)
+
+print("\nd) Rezultate (Prior Puternic pt 'mu'):")
+print(summary_b)
+print("\n   -> Comparatie estimari 'mu':")
+print(f"      Frecventist (date): {mean_freq:.2f}")
+print(f"      Bayes (Prior Slab): {summary_a.loc['mu', 'mean']:.2f}")
+print(f"      Bayes (Prior Puternic): {summary_b.loc['mu', 'mean']:.2f}")
+print("   -> Prior-ul puternic N(50, 1) 'trage' estimarea (50.55) departe de media datelor (58.0).")
