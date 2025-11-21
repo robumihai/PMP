@@ -1,4 +1,3 @@
-
 import networkx as nx
 from pgmpy.models import DiscreteBayesianNetwork
 import matplotlib.pyplot as plt
@@ -41,4 +40,22 @@ cpd_c = TabularCPD('C', 2,
 
 net.add_cpds(cpd_o, cpd_h, cpd_w, cpd_r, cpd_e, cpd_c)
 
+solutie = VariableElimination(net)
 
+
+print(solutie.query(['H'], evidence={'C': 'comfortable'}))
+
+print(solutie.query(['E'], evidence={'C': 'comfortable'}))
+
+print(solutie.map_query(['H', 'W'], evidence={'C': 'comfortable'}))
+
+
+# c)
+
+# 1. 
+# Raspuns: Da
+# Explicatie: H este observat si taie legatura spre E. Odata ce stim H, consumul E nu mai depinde de nimic altceva (W sau O).
+
+# 2.
+# Raspuns: Da
+# Explicatie: Avem lantul O -> ... -> R -> C. R este observat si blocheaza calea seriala. C depinde direct doar de R, deci devine independent de O.
