@@ -1,0 +1,25 @@
+import numpy as np
+from hmmlearn import hmm
+
+model = hmm.CategoricalHMM(n_components=3, n_iter=100)
+
+model.startprob_ = np.array([0.4, 0.3, 0.3])
+
+model.transmat_ = np.array([
+    [0.6, 0.3, 0.1],
+    [0.2, 0.7, 0.1],
+    [0.3, 0.2, 0.5]
+])
+
+model.emissionprob_ = np.array([
+    [0.1, 0.7, 0.2],
+    [0.05, 0.25, 0.7],
+    [0.8, 0.15, 0.05]
+])
+
+observations = np.array([[1, 2, 0]]).T
+
+log_probability = model.score(observations)
+probability = np.exp(log_probability)
+
+print("Probabilitatea secvenței [Medium, High, Low]:", probability)
