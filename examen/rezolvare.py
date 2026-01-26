@@ -66,3 +66,8 @@ with pm.Model() as model_logistic:
     
     y=pm.Bernoulli('y',p=p,observed=df_std['is_high_demand'])
     trace_logistic=pm.sample(2000,tune=1000)
+
+
+#7. analiza deciziei
+az.plot_posterior(trace_logistic,var_names=['betas'],hdi_prob=0.95)
+plt.show()
