@@ -56,3 +56,13 @@ plt.show()
 #5. constructie target binar
 Q75=df['rentals'].quantile(0.75)
 df_std['is_high_demand']=(df['rentals']>=Q75).astype(int)
+
+# 6.
+with pm.Model() as model_logistic:
+    alpha=pm.Normal('alpha',mu=0,sigma=10)
+    betas=pm.Normal('betas',mu=0,sigma=10,shape=4)
+    
+    p=pm.math.sigmoid(alpha+betas[0]*df_std['temp_c']+betas[1]*df_std['humidity']+betas[2]*df_std['wind_kph']+betas[3]*df_std['temp_c2'])
+    
+    y=pm.Bernoulli('y',p=p,observed=df_std['is_high_demand'])
+    trace_logistic=pm.sample(2000,tune=1000)
