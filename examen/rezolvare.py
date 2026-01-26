@@ -52,3 +52,7 @@ az.summary(trace_poly)
 ppc=pm.sample_posterior_predictive(trace_poly,model=model_poly)
 az.plot_ppc(ppc)
 plt.show()
+
+#5. constructie target binar
+Q75=df['rentals'].quantile(0.75)
+df_std['is_high_demand']=(df['rentals']>=Q75).astype(int)
