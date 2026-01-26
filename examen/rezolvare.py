@@ -35,3 +35,20 @@ with pm.Model() as model_poly:
     mu=alpha+betas[0]*df_std['temp_c']+betas[1]*df_std['humidity']+betas[2]*df_std['wind_kph']+betas[3]*df_std['temp_c2']
     y=pm.Normal('y',mu=mu,sigma=sigma,observed=df['rentals'])
     trace_poly=pm.sample(2000,tune=1000,target_accept=0.9)
+
+
+
+#3.
+az.summary(trace_poly)
+#variabila cu cea mai mare infleunte este de obicei temp_c(coeficientul cu valoarea absoluta cea mai mare)
+
+
+#4. eroare la compilare
+#a) WAIC
+#comparison=az.compare({'linear':trace_linear,'poly':trace_poly},ic="waic")
+#print(comparison)
+
+#b) PPC
+ppc=pm.sample_posterior_predictive(trace_poly,model=model_poly)
+az.plot_ppc(ppc)
+plt.show()
